@@ -1,0 +1,50 @@
+# https://www.xfelix.com/2020/09/pihole-unbound-docker-setup-on-raspberry-pi/
+version: '2.4'
+ 
+networks:
+  dns_net:
+    driver: bridge
+    ipam:
+        config:
+        - subnet: 172.20.0.0/16
+ 
+services:
+  pihole:
+    container_name: pihole
+    hostname: pihole
+    image: pihole/pihole:latest
+    networks:
+      dns_net:
+        ipv4_address: 172.20.0.6
+    ports:
+      - "53:53/tcp"
+      - "53:53/udp"
+      - "80:80/tcp"
+      - "443:443/tcp"
+    environment:
+      - TZ=Australia/Sydney
+      - WEBPASSWORD=<password>
+      - PIHOLE_DNS_=172.20.0.7#5335
+      - CUSTOM_CACHE_SIZE=0
+    volumes:
+      - './etc-pihole/:/etc/pihole/'
+      - './etc-dnsmasq.d/:/etc/dnsmasq.d/'
+    restart: unless-stopped
+  unbound:
+    container_name: unbound
+    image: madnuttah/unbound:latest
+    networks:
+      dns_net:
+        ipv4_address: 172.20.0.7
+    environment:
+      - TZ=America/New_York
+      - ServerIP=172.20.0.7
+    volumes:
+      - ./etc-unbound:/etc/unbound/unbound.conf.d:rw
+
+    ports:
+      - "5335:5335/tcp"
+      - "5335:5335/udp"
+    healthcheck:
+      disable: true
+    restart: unless-stopped
