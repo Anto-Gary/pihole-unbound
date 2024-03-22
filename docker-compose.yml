@@ -22,14 +22,16 @@ services:
       - "80:80/tcp"
       - "443:443/tcp"
     environment:
-      - TZ=Australia/Sydney
-      - WEBPASSWORD=<password>
+      - TZ=America/New_York
+      - WEBPASSWORD=${PIHOLE_PASSWORD}
       - PIHOLE_DNS_=172.20.0.7#5335
       - CUSTOM_CACHE_SIZE=0
     volumes:
       - './etc-pihole/:/etc/pihole/'
       - './etc-dnsmasq.d/:/etc/dnsmasq.d/'
     restart: unless-stopped
+
+
   unbound:
     container_name: unbound
     image: madnuttah/unbound:latest

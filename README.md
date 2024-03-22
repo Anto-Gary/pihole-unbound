@@ -1,11 +1,5 @@
 # Pi-hole - With Unbound 
-this script assumes its being run on a raspberry pi Bullseye OS (64 bit) with a static IP address assigned to it
-
-1. change `WEBPASSWORD` under `environment` key in `docker-compose.yml` file
-
-2. run `./start-pihole-unbound.sh`
-   * runs `docker-compose.yml` file
-   * pihole UI accessible on `http://<raspberry_pi_ipaddr>/admin` with password from step 1 
+- pihole container which uses unbound container as DNS resolver (Bullseye OS (64 bit)) 
 
 
 ## What is Unbound? (taken from [here](https://docs.pi-hole.net/guides/dns/unbound/))
@@ -34,6 +28,46 @@ this script assumes its being run on a raspberry pi Bullseye OS (64 bit) with a 
     * The authoritative server will answer with the IP address of the domain pi-hole.net.
     * Your recursive server will send the reply to your Pi-hole which will, in turn, reply to your client and tell it the answer to its request.
     * Lastly, your Pi-hole will save the answer in its cache to be able to respond faster if any of your clients queries the same domain again.
+
+
+
+
+### Manual Prerequisites
+```bash
+    * `ssh <user>@<raspberry_pi_ipaddr>`
+
+    * `sudo raspi-config`
+        * enable VNC
+            * `Interface Options` -> `VNC`
+        * set VNC screen resolution (because a monitor was never used with pi)
+            * `Display Options` -> `VNC Resolution`
+
+
+## command to silently generate ssh key for auth with github
+# ssh-keygen -q -t rsa -f "$HOME/.ssh/id_rsa" -N """$HOME/.ssh/id_rsa" ; cat ~/.ssh/id_rsa
+```
+
+
+
+### Installation Instructions
+```bash
+# 0.
+# change IP in addStaticIp.sh
+# add pihole password in .env file
+
+# 1. add static IP to dhcpcd file && install some packages
+./addStaticIp.sh.sh && ./newServerSetup.sh && sudo reboot
+
+# 2. install docker 
+./installDocker.sh && sudo reboot
+
+# 3. start containers 
+./startPihole.sh
+
+# 4. stop containers (also removes all images too)
+./stopPihole.sh
+```
+
 
 
 ### Browser Security
