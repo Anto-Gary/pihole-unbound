@@ -31,18 +31,18 @@ static routers=$routerAddress\n\
 static domain_name_servers=$dnsServer"
 
     # tell future self this next block was added by script
-    echo "# Static IP configuration was added by script on $utcTime" >> "$filePath"
+    echo -e "\n\n# Static IP configuration for $ipAddress added by automation script on $now" >> "$filePath"
 
     # Append the static IP configuration block to the file
-    echo -e "$staticConfig" >> "$filePath"
+    echo -e "$staticConfig\n\n" >> "$filePath"
         
-    echo "Static IP address $ipAddress added to $filePath"
+    echo -e "last 10 lines of $filePath...\n"
 
     # show what was just added
-    tail -n 5 "$file_path"
+    tail -n 10 "$filePath"
 }
 
 # Example usage
 staticIp="192.168.1.144"  # Change this to your desired static IP address
 configFile="/etc/dhcpcd.conf"
-addStaticIp "$staticIp" "$configFile"
+addStaticIpToFile "$staticIp" "$configFile"
