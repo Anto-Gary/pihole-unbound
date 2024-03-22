@@ -44,7 +44,7 @@
 
 
 ## command to silently generate ssh key for auth with github
-# ssh-keygen -q -t rsa -f "$HOME/.ssh/id_rsa" -N """$HOME/.ssh/id_rsa" ; cat ~/.ssh/id_rsa
+# ssh-keygen -q -t rsa -f "$HOME/.ssh/id_rsa" -N "" ; cat ~/.ssh/id_rsa.pub
 ```
 
 
@@ -56,7 +56,7 @@
 # add pihole password in .env file
 
 # 1. add static IP to dhcpcd file && install some packages
-./addStaticIp.sh.sh && ./newServerSetup.sh && sudo reboot
+./addStaticIp.sh && ./newServerSetup.sh && sudo reboot
 
 # 2. install docker 
 ./installDocker.sh && sudo reboot
