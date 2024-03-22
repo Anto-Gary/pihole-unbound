@@ -45,6 +45,7 @@
 
 ## command to silently generate ssh key for auth with github
 # ssh-keygen -q -t rsa -f "$HOME/.ssh/id_rsa" -N "" ; cat ~/.ssh/id_rsa.pub
+# check for devices on wifi - nmap 192.168.1.0/24
 ```
 
 
