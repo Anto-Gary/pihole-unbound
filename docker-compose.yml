@@ -1,6 +1,4 @@
 # https://www.xfelix.com/2020/09/pihole-unbound-docker-setup-on-raspberry-pi/
-version: '2.4'
- 
 networks:
   dns_net:
     driver: bridge
@@ -12,7 +10,7 @@ services:
   pihole:
     container_name: pihole
     hostname: pihole
-    image: pihole/pihole:latest
+    image: pihole/pihole:2024.07.0
     networks:
       dns_net:
         ipv4_address: 172.20.0.6
@@ -34,7 +32,7 @@ services:
 
   unbound:
     container_name: unbound
-    image: madnuttah/unbound:latest
+    image: madnuttah/unbound:1.21.1-0
     networks:
       dns_net:
         ipv4_address: 172.20.0.7
