@@ -151,7 +151,10 @@ runs `verify.sh`. It's safe to re-run. Then set each device's DNS server to
   `sudo openssl x509 -in etc-pihole/tls.pem -noout -fingerprint -sha256` with
   what your browser shows before trusting it).
 - Password: `sudo cat .secrets/pihole_password`, or put your own in that file
-  before installing.
+  before installing. `WEBPASSWORD_FILE` is the secret name (`pihole_password`),
+  not its full path; the image prepends `/run/secrets/`. After changing the
+  password file, run `sudo docker compose up -d --force-recreate pihole`
+  to apply it.
 - Timezone: copy [.env.example](./.env.example) to `.env` and edit `TZ`.
 
 ## Day to day
@@ -171,6 +174,25 @@ dig @192.168.1.144 example.org A
 dig @192.168.1.144 example.org A +tcp
 dig @192.168.1.144 fail01.dnssec.works A
 ```
+
+### Watching live traffic
+
+Run each in its own terminal and browse from a LAN device. Stop with `Ctrl+C`.
+
+```bash
+# Pi-hole: client queries, cache hits, blocks, and forwards to Unbound
+sudo docker compose exec pihole tail -f /var/log/pihole/pihole.log
+
+# Unbound: the queries Pi-hole forwarded, and each reply with its lookup time
+sudo docker compose logs -f --tail=0 unbound
+```
+
+Unbound only logs queries while `log-queries` and `log-replies` are `yes` in
+[etc-unbound/pihole.conf](./etc-unbound/pihole.conf). With them set to `no` (the
+privacy-friendly default) its log shows only startup and errors. Unbound's log is a
+plaintext history of every site visited, so set both back to `no` when you're done,
+then run `sudo docker compose restart unbound`. Pi-hole answers cached and blocked
+queries itself, so those never appear in Unbound's log.
 
 ## Things to know
 
