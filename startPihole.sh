@@ -1,3 +1,4 @@
 #!/bin/bash
-
-docker compose up -d
+set -euo pipefail
+cd "$(dirname "$0")"
+exec sudo docker compose up -d --wait --wait-timeout 240
