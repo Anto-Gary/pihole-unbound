@@ -5,7 +5,12 @@ set -euo pipefail
 [[ $EUID -eq 0 ]] || exec sudo "$0" "$@"
 cd "$(dirname "$0")"
 
-PI_IP=192.168.1.144
+[[ -f .env ]] || { echo "Error: missing .env. Copy .env.example to .env and set PI_IP and PI_IP6." >&2; exit 1; }
+set -a
+# shellcheck source=/dev/null
+. ./.env
+set +a
+: "${PI_IP:?Set PI_IP in .env}" "${PI_IP6:?Set PI_IP6 in .env}"
 
 check() { # description, expected status, dig output
     grep -q "status: $2," <<< "$3" || { echo "FAIL: $1 (expected $2)" >&2; exit 1; }
@@ -16,6 +21,13 @@ for transport in +notcp +tcp; do
     check "Pi-hole $transport" NOERROR "$answer"
     grep -Eq '^example\.org\.[[:space:]]+[0-9]+[[:space:]]+IN[[:space:]]+A[[:space:]]' <<< "$answer" ||
         { echo "FAIL: Pi-hole $transport returned no A record" >&2; exit 1; }
+done
+
+for transport in +notcp +tcp; do
+    answer=$(dig "@$PI_IP6" example.org AAAA "$transport" +time=5 +tries=2)
+    check "Pi-hole IPv6 listener $transport" NOERROR "$answer"
+    grep -Eq '^example\.org\.[[:space:]]+[0-9]+[[:space:]]+IN[[:space:]]+AAAA[[:space:]]' <<< "$answer" ||
+        { echo "FAIL: Pi-hole IPv6 listener $transport returned no AAAA record" >&2; exit 1; }
 done
 
 # Runs inside Pi-hole so Unbound's source-address ACL is exercised too.

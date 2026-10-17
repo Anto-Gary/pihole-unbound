@@ -155,7 +155,9 @@ runs `verify.sh`. It's safe to re-run. Then set each device's DNS server to
   not its full path; the image prepends `/run/secrets/`. After changing the
   password file, run `sudo docker compose up -d --force-recreate pihole`
   to apply it.
-- Timezone: copy [.env.example](./.env.example) to `.env` and edit `TZ`.
+- Settings: copy [.env.example](./.env.example) to `.env` and set `PI_IP` (the Pi's
+  IPv4 address), `PI_IP6` (its private `fd..` IPv6 address) and `TZ`. The scripts and
+  Compose file read these values, and `.env` is not committed.
 
 ## Day to day
 
@@ -194,12 +196,33 @@ plaintext history of every site visited, so set both back to `no` when you're do
 then run `sudo docker compose restart unbound`. Pi-hole answers cached and blocked
 queries itself, so those never appear in Unbound's log.
 
+### IPv6
+
+Pi-hole also listens on the Pi's private (ULA) IPv6 address set as `PI_IP6` in `.env`,
+so it isn't reachable from the internet. Test it from another LAN device, using that
+address:
+
+```bash
+dig @<PI_IP6> example.org AAAA
+dig @<PI_IP6> example.org AAAA +tcp
+```
+
+Expect `NOERROR` with AAAA records; `sudo ./verify.sh` checks this too. The listener
+only helps once your router advertises that address as the IPv6 DNS server (RDNSS /
+DHCPv6 DNS), or devices have it set manually. The repo doesn't change your router.
+IPv6 queries reach Pi-hole through Docker's proxy, so they appear in the Query Log as
+coming from `172.20.0.1` rather than the real device. If the Pi's address ever
+changes, update `PI_IP6` in `.env` and re-run `sudo ./startPihole.sh`. The container
+won't start while the address is missing. Don't put your public IPv6 address in
+`.env` or commit it; `.env` is untracked.
+
 ## Things to know
 
 - **Clients can bypass it.** Browsers with their own DoH, VPNs, and IPv6 DNS
   advertised by your router can skip Pi-hole. This repo doesn't change the
-  network to prevent that. Don't add a public "secondary" DNS if you want
-  consistent filtering.
+  network to prevent that, so point the router's advertised IPv6 DNS at the address
+  above or turn IPv6 DNS advertisement off. Don't add a public "secondary" DNS if
+  you want consistent filtering.
 - **Docker bypasses UFW.** Published ports are exposed before UFW's INPUT rules
   apply, and binding to the LAN address isn't an access policy. Don't port-forward
   this to the internet.

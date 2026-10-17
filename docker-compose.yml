@@ -12,9 +12,11 @@ services:
       dns_net:
         ipv4_address: 172.20.0.6
     ports:
-      - "192.168.1.144:53:53/tcp"
-      - "192.168.1.144:53:53/udp"
-      - "192.168.1.144:443:443/tcp"
+      - "${PI_IP:?Set PI_IP in .env}:53:53/tcp"
+      - "${PI_IP:?Set PI_IP in .env}:53:53/udp"
+      - "[${PI_IP6:?Set PI_IP6 in .env}]:53:53/tcp"
+      - "[${PI_IP6:?Set PI_IP6 in .env}]:53:53/udp"
+      - "${PI_IP:?Set PI_IP in .env}:443:443/tcp"
     environment:
       TZ: ${TZ:-America/New_York}
       WEBPASSWORD_FILE: pihole_password
