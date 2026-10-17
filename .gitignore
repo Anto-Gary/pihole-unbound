@@ -2,3 +2,5 @@ etc-pihole/
 .env
 .secrets/
 backups/
+hosts/*
+!hosts/local-hosts.example

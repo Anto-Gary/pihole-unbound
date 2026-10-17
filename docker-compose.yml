@@ -19,7 +19,7 @@ services:
       - "${PI_IP:?Set PI_IP in .env}:443:443/tcp"
     environment:
       TZ: ${TZ:-America/New_York}
-      WEBPASSWORD_FILE: pihole_password
+      FTLCONF_webserver_api_password: ${PIHOLE_PASSWORD:?Set PIHOLE_PASSWORD in .env}
       FTLCONF_dns_upstreams: "172.20.0.7#5335"
       FTLCONF_dns_listeningMode: ALL
       FTLCONF_dns_dnssec: "false"
@@ -28,10 +28,10 @@ services:
       FTLCONF_ntp_ipv6_active: "false"
       FTLCONF_ntp_sync_active: "false"
       FTLCONF_webserver_port: "443s"
-    secrets:
-      - pihole_password
+      FTLCONF_misc_dnsmasq_lines: "hostsdir=/etc/pihole-hosts"
     volumes:
       - ./etc-pihole:/etc/pihole
+      - ./hosts:/etc/pihole-hosts:ro
     cap_drop:
       - NET_RAW
     healthcheck:
@@ -89,7 +89,3 @@ networks:
 
 volumes:
   unbound-state:
-
-secrets:
-  pihole_password:
-    file: ./.secrets/pihole_password

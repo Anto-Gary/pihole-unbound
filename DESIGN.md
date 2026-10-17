@@ -37,8 +37,9 @@ as two containers on a Raspberry Pi 4 running Raspberry Pi OS Trixie 64-bit.
   Pi-hole drops `NET_RAW`; DHCP and NTP services are off; admin is HTTPS-only.
   Pi-hole keeps the capabilities its startup needs; a stricter profile wasn't
   assumed to work.
-- **Password as a Compose secret** (`.secrets/pihole_password`, untracked, mode 0600).
-  It's a file mount, not an encrypted vault.
+- **Password in `.env`** (`PIHOLE_PASSWORD`, untracked, mode 0600), passed to Pi-hole as
+  an environment variable. That's visible to anyone with Docker access on the Pi, which
+  is acceptable for a single-user host. It's plaintext on disk, not an encrypted vault.
 - **Pi-hole's own DNSSEC is off.** Unbound is the single validating layer.
 
 ## What was deliberately left out

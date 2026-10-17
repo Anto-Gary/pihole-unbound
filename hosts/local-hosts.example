@@ -1,0 +1,7 @@
+# Copy this file to local-hosts.txt (same folder) and list your devices.
+# One "IP-address hostname" per line. Saving the file applies it, with no restart.
+# Pi-hole then shows the name instead of the IP in its UI, and the name resolves on your LAN.
+# Give each device a DHCP reservation in the eero app so its IP never changes.
+#
+# 192.168.1.26 laptop
+# 192.168.1.63 phone

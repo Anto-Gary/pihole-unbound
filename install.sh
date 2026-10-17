@@ -46,10 +46,14 @@ EOF
     apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
     systemctl enable --now docker
 fi
-apt-get install -y bind9-dnsutils openssl tcpdump
+apt-get install -y bind9-dnsutils openssl tcpdump nmap
 
-install -d -m 0700 .secrets
-[[ -s .secrets/pihole_password ]] || (umask 077; openssl rand -hex 32 > .secrets/pihole_password)
+if [[ -z ${PIHOLE_PASSWORD:-} ]]; then
+    PIHOLE_PASSWORD=$(openssl rand -hex 32)
+    [[ -z $(tail -c1 .env) ]] || echo >> .env
+    (umask 077; echo "PIHOLE_PASSWORD=$PIHOLE_PASSWORD" >> .env)
+    echo "Generated an admin password and saved it as PIHOLE_PASSWORD in .env."
+fi
 
 docker compose pull
 docker compose up -d --wait --wait-timeout 240 ||
@@ -60,5 +64,5 @@ cat <<EOF
 
 Done. Set each device's DNS server to $PI_IP.
 Admin UI: https://$PI_IP/admin/ (self-signed certificate)
-Admin password: sudo cat $PWD/.secrets/pihole_password
+Admin password: grep PIHOLE_PASSWORD $PWD/.env
 EOF

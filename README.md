@@ -150,14 +150,15 @@ runs `verify.sh`. It's safe to re-run. Then set each device's DNS server to
 - Admin UI: `https://192.168.1.144/admin/` (self-signed certificate; compare
   `sudo openssl x509 -in etc-pihole/tls.pem -noout -fingerprint -sha256` with
   what your browser shows before trusting it).
-- Password: `sudo cat .secrets/pihole_password`, or put your own in that file
-  before installing. `WEBPASSWORD_FILE` is the secret name (`pihole_password`),
-  not its full path; the image prepends `/run/secrets/`. After changing the
-  password file, run `sudo docker compose up -d --force-recreate pihole`
-  to apply it.
+- Password: `grep PIHOLE_PASSWORD .env`. It's stored only in `.env`. install.sh
+  generates one if it's unset, or you can set your own (letters and digits only).
+  Compose passes it to Pi-hole as `FTLCONF_webserver_api_password`, so it's visible
+  to anyone who can run `docker inspect pihole`. After changing it, run
+  `sudo ./startPihole.sh` to apply it.
 - Settings: copy [.env.example](./.env.example) to `.env` and set `PI_IP` (the Pi's
-  IPv4 address), `PI_IP6` (its private `fd..` IPv6 address) and `TZ`. The scripts and
-  Compose file read these values, and `.env` is not committed.
+  IPv4 address), `PI_IP6` (its private `fd..` IPv6 address), `TZ` and optionally
+  `PIHOLE_PASSWORD`. The scripts and Compose file read these values, and `.env` is
+  not committed.
 
 ## Day to day
 
@@ -176,6 +177,19 @@ dig @192.168.1.144 example.org A
 dig @192.168.1.144 example.org A +tcp
 dig @192.168.1.144 fail01.dnssec.works A
 ```
+
+### Device names
+
+To see names instead of IP addresses in the Pi-hole UI, copy
+[hosts/local-hosts.example](./hosts/local-hosts.example) to `hosts/local-hosts.txt`
+and add one `IP hostname` per line, for example `192.168.1.26 laptop`. The file is
+git-ignored, so your device names stay private. Saving it applies the change
+immediately, with no restart. The first time, run `sudo ./startPihole.sh` so Pi-hole
+mounts the `hosts/` folder. Names show in the UI after it next refreshes them (a few
+minutes), and they resolve on your network too. Give each device a DHCP reservation in
+the eero app so its IP doesn't change. Back up `hosts/local-hosts.txt` yourself, since
+it isn't in git. The compose file sets `FTLCONF_misc_dnsmasq_lines`, which replaces
+any custom dnsmasq lines set in the UI.
 
 ### Watching live traffic
 
@@ -245,7 +259,7 @@ volume as a first fix.
 
 ## Backups and updates
 
-Back up `.secrets/`, `.env`, `etc-pihole/`, and the `unbound-state` volume with the
+Back up `.env`, `hosts/local-hosts.txt`, `etc-pihole/`, and the `unbound-state` volume with the
 containers stopped, preserving ownership and modes.
 
 Images are pinned by tag and digest in [docker-compose.yml](./docker-compose.yml)
